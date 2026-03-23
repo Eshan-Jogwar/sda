@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "author": "Gemini AI",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 100, "left": 0 },
+    { "type": "wokwi-hc-sr04", "id": "ultrasonic", "top": -100, "left": 200 },
+    { "type": "wokwi-photoresistor-sensor", "id": "ldr", "top": 250, "left": 300 },
+    { "type": "wokwi-dht22", "id": "dht", "top": -100, "left": 0 },
+    { "type": "wokwi-led", "id": "garden_led", "top": 150, "left": 400, "attrs": { "color": "green", "label": "Garden" } },
+    { "type": "wokwi-led", "id": "stair_led", "top": 50, "left": 400, "attrs": { "color": "yellow", "label": "Stairs" } }
+  ],
+  "connections": [
+    [ "uno:GND", "ultrasonic:GND", "black", [ "v0" ] ],
+    [ "uno:5V", "ultrasonic:VCC", "red", [ "v0" ] ],
+    [ "uno:9", "ultrasonic:TRIG", "orange", [ "v0" ] ],
+    [ "uno:10", "ultrasonic:ECHO", "yellow", [ "v0" ] ],
+    [ "uno:GND", "dht:GND", "black", [ "v0" ] ],
+    [ "uno:5V", "dht:VCC", "red", [ "v0" ] ],
+    [ "uno:2", "dht:SDA", "blue", [ "v0" ] ],
+    [ "uno:A0", "ldr:SIG", "green", [ "v0" ] ],
+    [ "uno:5V", "ldr:VCC", "red", [ "v0" ] ],
+    [ "uno:GND", "ldr:GND", "black", [ "v0" ] ],
+    [ "uno:5", "garden_led:A", "green", [ "v0" ] ],
+    [ "uno:GND", "garden_led:C", "black", [ "v0" ] ],
+    [ "uno:6", "stair_led:A", "yellow", [ "v0" ] ],
+    [ "uno:GND", "stair_led:C", "black", [ "v0" ] ]
+  ]
+}
