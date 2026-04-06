@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "author": "Gemini AI",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 180, "left": -50, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 80, "left": -150, "attrs": { "label": "MQ2 Sensor Simulation" } },
+    { "type": "wokwi-buzzer", "id": "buzzer", "top": 50, "left": 150, "attrs": { "label": "Alarm" } },
+    { "type": "wokwi-relay-module", "id": "relay", "top": 250, "left": 250, "attrs": {} },
+    { "type": "wokwi-dc-motor", "id": "motor", "top": 100, "left": 350, "attrs": { "label": "Water Pump" } },
+    { "type": "wokwi-led", "id": "ledRed", "top": 350, "left": 50, "attrs": { "color": "red", "label": "LPG Leak" } },
+    { "type": "wokwi-led", "id": "ledYellow", "top": 350, "left": 100, "attrs": { "color": "yellow", "label": "Fire Detected" } }
+  ],
+  "connections": [
+    [ "uno:GND.1", "pot1:GND", "black", [ "v0" ] ],
+    [ "uno:5V", "pot1:VCC", "red", [ "v0" ] ],
+    [ "uno:A0", "pot1:SIG", "green", [ "v0" ] ],
+
+    [ "uno:GND.2", "buzzer:1", "black", [ "v0" ] ],
+    [ "uno:8", "buzzer:2", "blue", [ "v0" ] ],
+
+    [ "uno:7", "relay:IN", "orange", [ "v0" ] ],
+    [ "uno:5V", "relay:VCC", "red", [ "v0" ] ],
+    [ "uno:GND.3", "relay:GND", "black", [ "v0" ] ],
+
+    [ "relay:NO", "motor:1", "blue", [ "v0" ] ],
+    [ "relay:COM", "uno:5V", "red", [ "v0" ] ],
+    [ "uno:GND.3", "motor:2", "black", [ "v0" ] ],
+
+    [ "uno:13", "ledRed:A", "red", [ "v0" ] ],
+    [ "uno:GND.1", "ledRed:C", "black", [ "v0" ] ],
+    [ "uno:12", "ledYellow:A", "yellow", [ "v0" ] ],
+    [ "uno:GND.1", "ledYellow:C", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
