@@ -1,0 +1,51 @@
+// Pin Definitions
+const int mq2Pin = A0;      // Potentiometer simulating MQ2
+const int buzzerPin = 8;    // Alarm
+const int pumpPin = 7;      // Water Pump (Relay)
+const int lpgLed = 13;      // LPG Status
+const int fireLed = 12;     // Fire Status
+
+// Thresholds (Simulated values 0-1023)
+const int LPG_THRESHOLD = 400;
+const int FIRE_THRESHOLD = 700;
+
+void setup() {
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(pumpPin, OUTPUT);
+  pinMode(lpgLed, OUTPUT);
+  pinMode(fireLed, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int sensorValue = analogRead(mq2Pin);
+  Serial.print("Sensor Level: ");
+  Serial.println(sensorValue);
+
+  // Logic Tree
+  if (sensorValue >= FIRE_THRESHOLD) {
+    // FIRE DETECTED
+    digitalWrite(lpgLed, HIGH);
+    digitalWrite(fireLed, HIGH);
+    tone(buzzerPin, 1000);   // Continuous high pitch
+    digitalWrite(pumpPin, HIGH); 
+    Serial.println("!!! FIRE ALERT: PUMP ACTIVE !!!");
+  } 
+  else if (sensorValue >= LPG_THRESHOLD) {
+    // LPG LEAK DETECTED
+    digitalWrite(lpgLed, HIGH);
+    digitalWrite(fireLed, LOW);
+    tone(buzzerPin, 500);    // Pulsing or lower pitch
+    digitalWrite(pumpPin, LOW); 
+    Serial.println("WARNING: LPG LEAK DETECTED");
+  } 
+  else {
+    // SYSTEM SAFE
+    digitalWrite(lpgLed, LOW);
+    digitalWrite(fireLed, LOW);
+    noTone(buzzerPin);
+    digitalWrite(pumpPin, LOW);
+  }
+
+  delay(200); // Stability delay
+}
