@@ -1,0 +1,92 @@
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+import time
+import sys
+
+# --- CONFIGURATION ---
+CREDENTIALS_FILE = 'serviceAccountKey.json'
+DATABASE_URL = 'https://YOUR_DATABASE_URL.firebaseio.com/'
+
+# Initialize Firebase
+cred = credentials.Certificate(CREDENTIALS_FILE)
+firebase_admin.initialize_app(cred, {
+    'databaseURL': DATABASE_URL
+})
+
+# --- SETUP VARIABLES ---
+role = input("Enter your role (user1 or user2): ").strip().lower()
+if role not in ['user1', 'user2']:
+    print("Invalid role. Defaulting to user1.")
+    role = 'user1'
+
+other_role = 'user2' if role == 'user1' else 'user1'
+chat_ref = db.reference('chatData')
+
+# Initialize DB state if it's empty
+if chat_ref.get() is None:
+    chat_ref.set({
+        'turn': 'user1',
+        'messages': {}
+    })
+
+print(f"Connected as {role.upper()}. Starting single-thread half-duplex mode...")
+
+# State tracking to avoid re-printing old messages or spamming the console
+last_message_id = None
+waiting_printed = False
+
+# --- MAIN SYNCHRONOUS LOOP ---
+try:
+    while True:
+        # 1. Fetch current state from Firebase (Synchronous blocking call)
+        chat_data = chat_ref.get()
+        if not chat_data:
+            continue
+            
+        current_turn = chat_data.get('turn', 'user1')
+        messages = chat_data.get('messages', {})
+        
+        # 2. Check for and print new messages
+        if messages:
+            # Sort message keys to ensure chronological order
+            sorted_keys = sorted(messages.keys())
+            for key in sorted_keys:
+                if last_message_id is None or key > last_message_id:
+                    msg = messages[key]
+                    if msg['sender'] != role:
+                        print(f"\n>> {msg['sender'].upper()} SAID: {msg['text']}")
+                    last_message_id = key
+
+        # 3. Handle Turn Logic strictly
+        if current_turn == role:
+            # Speak Mode: The program stops here and waits for your physical input.
+            # Because there are no threads, Firebase cannot update us while we type.
+            print(f"\n[SYSTEM] It is your turn. (The channel is locked to you)")
+            
+            msg_text = input(f"[{role.upper()}]: ")
+            
+            if msg_text.strip() != '':
+                # Send the message
+                db.reference('chatData/messages').push({
+                    'sender': role,
+                    'text': msg_text
+                })
+                # Immediately pass the turn to the other user
+                db.reference('chatData/turn').set(other_role)
+            
+            # Reset the waiting flag for the next cycle
+            waiting_printed = False
+            
+        else:
+            # Listen Mode: The channel is locked by the other user.
+            if not waiting_printed:
+                print(f"\n[SYSTEM] OVER. Waiting for {other_role.upper()} to reply...")
+                waiting_printed = True
+            
+            # Poll the database every 1.5 seconds to see if the turn has changed
+            time.sleep(1.5)
+
+except KeyboardInterrupt:
+    print("\nExiting walkie-talkie...")
+    sys.exit(0)
